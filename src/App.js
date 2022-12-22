@@ -1,25 +1,56 @@
-import logo from './logo.svg';
-import './App.css';
-
+import React, { useState, useEffect } from 'react'
+import Loading from './Loading'
+import Tours from './Tours'
+// ATTENTION!!!!!!!!!!
+// I SWITCHED TO PERMANENT DOMAIN
+const url = 'https://course-api.com/react-tours-project'
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+  const [loading,setLoading] = useState(true);
+  const [tours,setTours]= useState([]);
+
+  const removeTour = (id) => {
+    const newTours = tours.filter(tour=>tour.id!==id)
+    setTours(newTours)
+  }
+
+  const fetchTours = async () => {
+    setLoading(true);
+    try{
+      const res = await fetch(url)
+      const tours = await res.json();
+      console.log(tours)
+      setLoading(false)
+      setTours(tours)
+  } catch(error){
+    setLoading(false);
+    console.log(error)
+  }
+  }
+
+  useEffect(()=>{
+    fetchTours();
+  },[])
+
+  if(loading){
+    return (
+      <main><Loading/></main>
+    );
+  }
+  if(tours.length === 0){
+    return (
+      <main>
+        <div className='title'>
+          <h2>No tours left</h2>
+          <button className='btn' onClick={fetchTours}>
+            refresh
+          </button>
+        </div>
+      </main>
+    )
+  }
+  return <main>
+    <Tours tours={tours} remove={removeTour}/>
+  </main>
 }
 
-export default App;
+export default App
